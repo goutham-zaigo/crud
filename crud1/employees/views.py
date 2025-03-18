@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from .models import WorkAssignment, Employee, Project
 from .serializers import WorkAssignmentSerializer, ProjectSerializer
+from rest_framework.pagination import PageNumberPagination
 
 
 class WorkAssignmentAPIView(APIView):
@@ -38,6 +39,21 @@ class WorkAssignmentAPIView(APIView):
         task = get_object_or_404(WorkAssignment, pk=pk)
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class WorkAssignmentListView(APIView):
+    def get(self, request, employee_id):
+        assignments = WorkAssignment.objects.filter(employee_id=employee_id)
+        
+        # Apply pagination
+        paginator = PageNumberPagination()
+        paginated_assignments = paginator.paginate_queryset(assignments, request)
+
+        # Serialize the paginated data
+        serializer = WorkAssignmentSerializer(paginated_assignments, many=True)
+        
+        return paginator.get_paginated_response(serializer.data)
 
 
 class ProjectViewSet(ModelViewSet):
