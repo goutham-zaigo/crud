@@ -10,17 +10,25 @@ from rest_framework.pagination import PageNumberPagination
 
 class WorkAssignmentAPIView(APIView):
 
-    def get(self, request, employee_id):
-        """Retrieve all tasks assigned to an employee"""
-        tasks = WorkAssignment.objects.filter(employee_id=employee_id)
-        serializer = WorkAssignmentSerializer(tasks, many=True)
-        return Response(serializer.data)
+    
 
-    def post(self, request):
-        """Assign a new task to an employee"""
-        serializer = WorkAssignmentSerializer(data=request.data)
+    def get(self, request, employee_id):
+        try:
+            # Check if employee exists
+            employee = Employee.objects.get(pk=employee_id)
+        except Employee.DoesNotExist:
+            return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get work assignments for that employee
+        assignments = WorkAssignment.objects.filter(employee=employee)
+        serializer = WorkAssignmentSerializer(assignments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, employee_id):
+        data = request.data
+        data['employee'] = employee_id
+        serializer = WorkAssignmentSerializer(data=data)
         if serializer.is_valid():
-            # Save the work assignment
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -27,7 +27,7 @@ urlpatterns = [
     
 
 
-    path('', include('employees.urls')),
+    path('api/', include('employees.urls')),
    
 
 

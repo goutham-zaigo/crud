@@ -8,14 +8,18 @@ class Employee(models.Model):
         return self.name
 
 
+
+class Employee(models.Model):
+    name = models.CharField(max_length=100)
+    position = models.CharField(max_length=100, default="developer")
+
+
 class WorkAssignment(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="assignments")
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     task_name = models.CharField(max_length=255)
     description = models.TextField()
     due_date = models.DateField()
 
-    def __str__(self):
-        return self.task_name
 
 
 class Project(models.Model):
